@@ -1,0 +1,41 @@
+<apex:page standardController="Employee__c" extensions="EmployeeSkillsController" >
+    <apex:form >
+        <apex:pageBlock id="employeeId" title="Skills List">
+            <apex:commandButton action="{!save}" value="save"/>
+             <apex:commandButton action="{!reset}" value="Cancel" />
+
+            <apex:pageBlockSection collapsible="true" columns="5">
+                <apex:pageBlockTable value="{!empSList}" var="c" > 
+                    <apex:column headerValue="Select"> 
+ 						<apex:inputCheckbox value="{!c.selected}"/>                         
+                        <apex:param name="edit" value="{!c.emp.Id}"/>                                      
+                    </apex:column>
+                    
+                    <apex:column headerValue="Skill Name" rendered="{!IfProfileisAdmin}"> 
+ 						                        
+                        <apex:outputField value="{! c.emp.Name}"/>
+                        <apex:param name="edit" value="{!c.emp.Id}"/>                                      
+                    </apex:column>
+                    
+            		<apex:column headerValue="Expierence"> 
+                        <apex:inputField value="{! c.emp.Experience__c}" rendered="{!flag}" />
+                        <apex:param name="edit" value="{!c.emp.Id}"/>                                      
+                    </apex:column>
+                    
+                    <apex:column headerValue="Skill Category"> 
+                        <apex:inputField value="{! c.emp.Skill_Category__c}" rendered="{!(!flag)}"/>
+                        <apex:param name="edit" value="{!c.emp.Id}"/>                                      
+                    </apex:column>                   
+
+                    
+                    <apex:column headerValue="Grage"> 
+ 						                       
+                        <apex:inputField value="{! c.emp.Grage__c}" rendered="{!(!flag)}"/>
+                        <apex:param name="edit" value="{!c.emp.Id}"/>                                      
+                    </apex:column>
+                </apex:pageBlockTable> 
+                
+          </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>    
+</apex:page>

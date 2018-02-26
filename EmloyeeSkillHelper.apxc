@@ -1,0 +1,26 @@
+public class EmployeeSkillHelper {
+    
+    public static void insertNew(List<Employee__c> newMap){
+        
+        SumQA_DEV_ForProjectHelper.recheckQA_DEVonProject(newMap);
+        
+    }
+    public static void updateProject(Map<Id,Employee__c> listemp, Map<Id,Employee__c> oldMap){
+         
+        for(Employee__c objEmployee:listemp.values())
+        {
+            if( oldMap.get(objEmployee.id)!=null && objEmployee.Department__c != oldMap.get(objEmployee.id).Department__c)
+            {
+
+               SumQA_DEV_ForProjectHelper.updateProjectFromEmployee(listemp);  
+                
+            }
+            if(oldMap.get(objEmployee.id)== null){
+                SumQA_DEV_ForProjectHelper.updateProjectFromEmployee(listemp);
+                
+            }
+        
+    }
+
+}
+}

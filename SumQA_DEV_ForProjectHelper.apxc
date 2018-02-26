@@ -1,0 +1,81 @@
+public with sharing class SumQA_DEV_ForProjectHelper
+{
+    static Set<Id> Ids = new Set<Id>();
+    static List<SumHalper> HalperList  =  new List<SumHalper>();
+    static List <Project__c> listProject= new List <Project__c>();
+
+
+    public static void recheckQA_DEVonProject(List<Employee__c> EmployeeList)
+    {
+      
+        for(Employee__c e :EmployeeList){
+            Ids.add(e.Project__c);
+            
+        }
+       List<Project__c> projToUpdate =  recalculateSumQA_DEV_ForProject(Ids);
+        if(projToUpdate!=null)
+        {
+            update projToUpdate;
+        }
+    }
+    
+    public static void updateProjectFromEmployee(Map<Id, Employee__c> employeeMap){
+        for(Employee__c e :employeeMap.values()){
+            Ids.add(e.Project__c);
+        }
+ 		List<Project__c> projToUpdate =  recalculateSumQA_DEV_ForProject(Ids);
+        
+        update projToUpdate.get(1);
+        
+    }
+
+     public static List<Project__c> recalculateSumQA_DEV_ForProject(Set<Id> projectId)
+       {
+        Integer QAs = 0;
+        String QA= 'QA';            
+        Integer DEVs = 0;
+        String Dev = 'Software Development';
+          
+        
+        
+       for(Project__c proj :[SELECT Id, Name, QAs__c, Developers__c
+           FROM Project__c WHERE id =:projectId])
+       {
+            
+            for(Employee__c emp:[SELECT Id, Name, Department__c, Project__c
+         		FROM Employee__c WHERE Employee__c.Project__r.id =:projectId])
+        { 
+           
+            if(emp.Department__c == QA)
+            {
+               		QAs++;
+            }
+            if(emp.Department__c == Dev)
+            {
+                   DEVs++;
+            }
+            
+        }
+               HalperList.add(new SumHalper(proj, QAs, DEVs));
+            
+        }
+           if(listProject.size() ==0)
+           {
+              return null;
+           }
+           return listProject;
+    }
+    
+    class SumHalper
+    {
+        public Project__c project{get;set;}
+        public SumHalper(Project__c pr, Integer QAs, Integer DEVs){
+            this.project = pr;
+            this.project.QAs__c = QAs;
+            this.project.Developers__c = DEVs;
+            listProject.add(this.project);
+        }
+        
+    }
+        
+}

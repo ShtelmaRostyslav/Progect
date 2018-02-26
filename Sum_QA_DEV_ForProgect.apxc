@@ -1,0 +1,54 @@
+public with sharing class Sum_QA_DEV_ForProject {
+    
+    private class CounterHelper{
+        Integer QAs{get;set;}
+        Integer DEVs{get;set;}
+        
+            private CounterHelper(Integer qas, Integer devs){
+                this.QAs = qas;
+                this.DEVs = devs;
+                
+            }
+    }
+    
+    private static void sumEmployeeInProject(Map<Id,CounterHelper> countEmployee, Employee__c emp){
+        if(emp.Department__c == 'Software Development'){
+            countEmployee.get(emp.Project__c).DEVs++;            
+        }
+        else{
+            if(emp.Department__c == 'QA'){
+            countEmployee.get(emp.Project__c).QAs++;            
+        }
+        }
+        
+    }
+    
+    public static void updateProject(Map<id, Employee__c> empMap){
+        Map<Id,CounterHelper> counterEmployeeForProject = new Map<Id,CounterHelper>();
+        Set<Id> projectIds = new Set<Id>();
+        for(Employee__c emp : empMap.values()){
+            projectIds.add(emp.Project__c);
+            }
+            
+             Map<Id, Employee__c> mapEmp = new Map<Id, Employee__c>([
+                                            SELECT id, Name, Department__c
+                                             FROM Employee__c
+                                            WHERE Project__r.Id IN :projectIds]);
+	
+        for(Employee__c emp :empMap.values()){
+            if(counterEmployeeForProject.get(emp.Project__c) == null){
+                counterEmployeeForProject.put(emp.Project__c, new CounterHelper(0,0));
+                sumEmployeeInProject(counterEmployeeForProject, emp);
+            }
+            else{
+                sumEmployeeInProject(counterEmployeeForProject, emp);
+                
+            }
+        }
+        update counterEmployeeForProject;
+        
+    }
+    
+    
+
+}

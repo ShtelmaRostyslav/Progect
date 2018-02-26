@@ -1,0 +1,92 @@
+public class EmployeeSkillsController {
+    
+    ApexPages.StandardController stdCtrl;   
+    public List<EmployeeSkillsWrapperClass> empSList {get;private set;}
+
+    public boolean flag{get;set;} 
+    public Id employeeId; 
+    
+    public EmployeeSkillsController(ApexPages.StandardController controller){
+        flag=true; 
+        this.stdCtrl= controller;
+        employeeId=(Id)apexpages.currentPage().getParameters().get('Id');
+        getEmpSkills();
+		System.debug('employeeId  ' +employeeId);    
+    }
+    
+    
+    
+    public List<EmployeeSkillsWrapperClass> getEmpSkills(){
+        if(empSList==null){
+            empSList = new List<EmployeeSkillsWrapperClass>();
+            System.debug('create new empSList ');
+            for(EmployeeSkills__c empskill:[SELECT Id,Employee__r.Id, Name, Skill_Category__c, Experience__c, Grage__c
+                                           FROM EmployeeSkills__c
+                                           WHERE Employee__r.Id =: employeeId]){
+             System.debug('empskill.Name ' + empskill.Name);
+             empSList.add(new EmployeeSkillsWrapperClass(empskill));  
+                                            }
+        }
+        
+	return empSList;
+    }
+    public boolean getIfProfileisAdmin(){
+        Profile p = [Select Id, Name FROM Profile 
+                     WHERE Id =: userinfo.getProfileId() LIMIT 1];
+        if (p.Name == 'System Administrator'){
+            return true;
+        } else return false;
+    }
+    
+     public PageReference reset()
+     {
+          PageReference newpage = new PageReference(System.currentPageReference().getURL());
+       
+          newpage.setRedirect(true);
+          return newpage;
+    }
+    
+    
+    public PageReference save() {
+        flag=true; 
+        List<EmployeeSkills__c> selectedSkill= new List<EmployeeSkills__c>();
+        for(EmployeeSkillsWrapperClass emps:getEmpSkills()){
+            if(emps.selected==true){
+                selectedSkill.add(emps.emp);
+            }
+             try {
+            upsert(selectedSkill);
+        } catch(System.DMLException e) {
+            ApexPages.addMessages(e);
+            return null;
+        }
+        }
+        PageReference  pr= new PageReference(System.currentPageReference().getURL());
+
+       if (pr!= null) {
+            
+          pr.setRedirect(true);
+         return pr;   
+        } else {
+             empSList=null;
+            return pr;
+        }
+         
+       
+      
+       
+    }
+    
+    public class EmployeeSkillsWrapperClass{
+        
+        public EmployeeSkills__c emp{get;set;}
+        public Boolean selected{get;set;}
+        
+        public EmployeeSkillsWrapperClass(EmployeeSkills__c es){
+            this.emp = es;
+            this.selected = false;
+        }
+    }    
+    
+
+}
